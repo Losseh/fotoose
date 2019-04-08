@@ -1,0 +1,2 @@
+- grupa zdjęć / rozwiązywanie konfliktu takich samych ujęć / wybór najlepszego ujęcia
+- chronologiczna zmiana nazw w folderze (nazwa folderu + numer)

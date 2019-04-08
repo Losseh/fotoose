@@ -30,6 +30,8 @@ class TestUtils(unittest.TestCase):
         # then
         self.assertDictEqual(expected, output)
 
+    #TODO we should omit non-image files
+
 
 if __name__ == '__main__':
     unittest.main()
