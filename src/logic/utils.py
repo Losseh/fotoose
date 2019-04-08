@@ -37,3 +37,13 @@ def rename_chronologically(basename, files):
         output[old_file] = rename_file(basename, get_extension(old_file), file_to_number[old_file])
 
     return output
+
+
+def is_image_file(filepath):
+    #TODO checks if the the filepath refers to a image file
+
+    #TODO this should be some kind of constant
+    allowed_extensions = {'jpg', 'png'}
+    path_and_extension = filepath.split(".")
+
+    return len(path_and_extension) != 0 and path_and_extension[-1].lower() in allowed_extensions

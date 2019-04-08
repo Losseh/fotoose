@@ -29,7 +29,8 @@ def choose_file(parent, widget):
         Gtk.FileChooserAction.OPEN,
         (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
 
-    add_filters(dialog)
+    #TODO this is commented, but is very useful!
+    # add_filters(dialog)
 
     chosen_file = None
     response = dialog.run()
