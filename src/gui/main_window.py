@@ -1,14 +1,23 @@
 from gui.file_chooser import choose_directory, choose_file
 from logic.utils import is_image_file
 
+from os import listdir
+from os.path import join
+
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GdkPixbuf
+from gi.repository import Gtk, Gdk, GdkPixbuf
 
 
 class MainWindow(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self, title="Fotoose")
+
+        accel = Gtk.AccelGroup()
+        accel.connect(Gdk.keyval_from_name('N'), Gdk.ModifierType.CONTROL_MASK, 0, self.accel_previous_onclick)
+        accel.connect(Gdk.keyval_from_name('M'), Gdk.ModifierType.CONTROL_MASK, 0, self.accel_next_onclick)
+        accel.connect(Gdk.keyval_from_name('D'), Gdk.ModifierType.CONTROL_MASK, 0, self.accel_choose_directory)
+        self.add_accel_group(accel)
 
         self.vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         self.vbox.set_homogeneous(False)
@@ -18,39 +27,102 @@ class MainWindow(Gtk.Window):
         self.middle_box = Gtk.Box(spacing=6)
         self.bottom_box = Gtk.Box(spacing=6)
 
-        self.button1 = Gtk.Button(label="Choose file")
-        self.button1.connect("clicked", self.button1_clicked)
-        self.upper_box.pack_start(self.button1, True, True, 0)
+        self.button_choose_file = Gtk.Button(label="Choose file")
+        self.button_choose_file.connect("clicked", self.button_choose_file_onclick)
+        self.upper_box.pack_start(self.button_choose_file, True, True, 0)
 
-        self.button2 = Gtk.Button(label="Choose directory")
-        self.button2.connect("clicked", self.button2_clicked)
-        self.upper_box.pack_start(self.button2, True, True, 0)
+        self.button_choose_dir = Gtk.Button(label="Choose directory")
+        self.button_choose_dir.connect("clicked", self.button_choose_directory_onclick)
+        self.upper_box.pack_start(self.button_choose_dir, True, True, 0)
+
+        # initialization of the middle box
+        self.button_previous = Gtk.Button(label="<")
+        self.button_previous.connect("clicked", self.button_previous_onclick)
+
+        self.button_next = Gtk.Button(label=">")
+        self.button_next.connect("clicked", self.button_next_onclick)
 
         self.image = Gtk.Image()
+
+        self.middle_box.pack_start(self.button_previous, True, True, 0)
         self.middle_box.pack_start(self.image, True, True, 0)
+        self.middle_box.pack_start(self.button_next, True, True, 0)
+        #
 
         self.label = Gtk.Label()
-        self.label.set_text("No directory chosen")
         self.bottom_box.pack_start(self.label, True, True, 0)
-
         self.vbox.pack_start(self.upper_box, True, True, 0)
         self.vbox.pack_start(self.middle_box, True, True, 0)
         self.vbox.pack_start(self.bottom_box, True, True, 0)
 
-    def button1_clicked(self, widget):
+        self.images = []
+        self.active_image_id = 0
+        self.set_empty_image()
+
+    def button_choose_file_onclick(self, widget):
         image = choose_file(self, widget)
-        if is_image_file(image):
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-                filename=image,
-                width=200,
-                height=200,
-                preserve_aspect_ratio=True)
+        images = image if is_image_file(image) else []
 
-            self.image.set_from_pixbuf(pixbuf)
+        self.open_images(images)
 
-        print ("chose file: {}".format(image))
+    def button_choose_directory_onclick(self, widget):
+        self.choose_dir(widget)
 
-    def button2_clicked(self, widget):
+    def accel_choose_directory(self, *args):
+        self.choose_dir(args[1])
+
+    def choose_dir(self, widget):
         directory = choose_directory(self, widget)
-        self.label.set_text(directory)
-        print ("chose directory: {}".format(directory))
+        # this should be moved somewhere else
+        files = [join(directory, f) for f in listdir(directory)]
+        images = [f for f in files if is_image_file(f)]
+        self.open_images(images)
+
+    def button_previous_onclick(self, widget):
+        self.previous_image()
+
+    def accel_previous_onclick(self, *args):
+        if self.button_previous.get_sensitive():
+            self.previous_image()
+
+    def previous_image(self):
+        self.active_image_id -= 1
+        self.update_image()
+
+    def button_next_onclick(self, widget):
+        self.next_image()
+
+    def accel_next_onclick(self, *args):
+        if self.button_next.get_sensitive():
+            self.next_image()
+
+    def next_image(self):
+        self.active_image_id += 1
+        self.update_image()
+
+    def open_images(self, images):
+        if len(images) > 0:
+            self.images = images
+            self.active_image_id = 0
+            self.update_image()
+        else:
+            self.set_empty_image()
+
+    def update_image(self):
+        image_id = self.active_image_id
+        number_of_images = len(self.images)
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+            filename=self.images[image_id],
+            width=1000,
+            height=1000,
+            preserve_aspect_ratio=True)
+        self.image.set_from_pixbuf(pixbuf)
+        self.button_previous.set_sensitive(image_id > 0)
+        self.button_next.set_sensitive(image_id < number_of_images - 1)
+        self.label.set_text("Photo {} / {}".format(image_id + 1, number_of_images))
+
+    def set_empty_image(self):
+        self.image.set_from_pixbuf(None)
+        self.button_previous.set_sensitive(False)
+        self.button_next.set_sensitive(False)
+        self.label.set_text("No photos chosen")
