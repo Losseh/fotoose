@@ -1,4 +1,4 @@
-from gui.file_chooser import choose_directory, choose_file
+from gui.file_chooser import choose_directory
 from logic.utils import is_image_file, map_to_chronological_names, retain_letters
 from system.utils import rename_files, map_files_to_creation_time
 
@@ -54,6 +54,7 @@ class MainWindow(Gtk.Window):
 
         self.rename_photos_button = Gtk.Button(label="Rename chronologically")
         self.rename_photos_button.connect('clicked', self.button_rename_photos)
+        self.rename_photos_button.set_sensitive(False)
         self.vbox.pack_start(self.rename_photos_button, True, True, 0)
 
         self.path = None
@@ -76,6 +77,7 @@ class MainWindow(Gtk.Window):
         images = [f for f in files if is_image_file(join(self.path, f))]
         images.sort()
         self.open_images(images)
+        self.rename_photos_button.set_sensitive(len(images) > 0)
 
     def button_previous_onclick(self, widget):
         self.previous_image()

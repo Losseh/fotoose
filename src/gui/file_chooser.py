@@ -1,9 +1,12 @@
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
+import logging
 
 
 def choose_directory(parent, widget):
+    logger = logging.getLogger(__name__)
+
     dialog = Gtk.FileChooserDialog("Please choose a folder", parent,
                                    Gtk.FileChooserAction.SELECT_FOLDER,
                                    (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
@@ -14,17 +17,19 @@ def choose_directory(parent, widget):
     response = dialog.run()
     if response == Gtk.ResponseType.OK:
         chosen_directory = dialog.get_filename()
-        print("Select clicked")
-        print("Folder selected: " + chosen_directory)
+        logger.debug("choose_directory: Folder selected: " + chosen_directory)
     elif response == Gtk.ResponseType.CANCEL:
-        print("Cancel clicked")
+        logger.debug("choose_directory: Cancel clicked")
 
     dialog.destroy()
 
     return chosen_directory
 
 
+#TODO unused
 def choose_file(parent, widget):
+    logger = logging.getLogger(__name__)
+
     dialog = Gtk.FileChooserDialog("Please choose a file", parent,
         Gtk.FileChooserAction.OPEN,
         (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
@@ -36,10 +41,9 @@ def choose_file(parent, widget):
     response = dialog.run()
     if response == Gtk.ResponseType.OK:
         chosen_file = dialog.get_filename()
-        print("Open clicked")
-        print("File selected: " + chosen_file)
+        logger.debug("choose_file: File selected: " + chosen_file)
     elif response == Gtk.ResponseType.CANCEL:
-        print("Cancel clicked")
+        logger.debug("choose_file: Cancel clicked")
 
     dialog.destroy()
     return chosen_file
