@@ -1,8 +1,9 @@
 from gui.file_chooser import choose_directory, choose_file
-from logic.utils import is_image_file
+from logic.utils import is_image_file, map_to_chronological_names, retain_letters
+from system.utils import rename_files, map_files_to_creation_time
 
 from os import listdir
-from os.path import join
+from os.path import join, basename
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -26,10 +27,6 @@ class MainWindow(Gtk.Window):
         self.upper_box = Gtk.Box(spacing=6)
         self.middle_box = Gtk.Box(spacing=6)
         self.bottom_box = Gtk.Box(spacing=6)
-
-        self.button_choose_file = Gtk.Button(label="Choose file")
-        self.button_choose_file.connect("clicked", self.button_choose_file_onclick)
-        self.upper_box.pack_start(self.button_choose_file, True, True, 0)
 
         self.button_choose_dir = Gtk.Button(label="Choose directory")
         self.button_choose_dir.connect("clicked", self.button_choose_directory_onclick)
@@ -55,15 +52,14 @@ class MainWindow(Gtk.Window):
         self.vbox.pack_start(self.middle_box, True, True, 0)
         self.vbox.pack_start(self.bottom_box, True, True, 0)
 
+        self.rename_photos_button = Gtk.Button(label="Rename chronologically")
+        self.rename_photos_button.connect('clicked', self.button_rename_photos)
+        self.vbox.pack_start(self.rename_photos_button, True, True, 0)
+
+        self.path = None
         self.images = []
         self.active_image_id = 0
         self.set_empty_image()
-
-    def button_choose_file_onclick(self, widget):
-        image = choose_file(self, widget)
-        images = image if is_image_file(image) else []
-
-        self.open_images(images)
 
     def button_choose_directory_onclick(self, widget):
         self.choose_dir(widget)
@@ -72,10 +68,13 @@ class MainWindow(Gtk.Window):
         self.choose_dir(args[1])
 
     def choose_dir(self, widget):
-        directory = choose_directory(self, widget)
-        # this should be moved somewhere else
-        files = [join(directory, f) for f in listdir(directory)]
-        images = [f for f in files if is_image_file(f)]
+        self.path = choose_directory(self, widget)
+        self.open_dir()
+
+    def open_dir(self):
+        files = listdir(self.path)
+        images = [f for f in files if is_image_file(join(self.path, f))]
+        images.sort()
         self.open_images(images)
 
     def button_previous_onclick(self, widget):
@@ -96,6 +95,17 @@ class MainWindow(Gtk.Window):
         if self.button_next.get_sensitive():
             self.next_image()
 
+    def button_rename_photos(self, widget):
+        # TODO: this should be a method in some kind of Controller class
+        file_to_creation_time = map_files_to_creation_time(self.path, self.images)
+
+        directory_name = retain_letters(basename(self.path)).lower()
+        old_to_new_names = map_to_chronological_names(directory_name, file_to_creation_time)
+        rename_files(self.path, old_to_new_names)
+        #
+
+        self.open_dir()
+
     def next_image(self):
         self.active_image_id += 1
         self.update_image()
@@ -112,7 +122,7 @@ class MainWindow(Gtk.Window):
         image_id = self.active_image_id
         number_of_images = len(self.images)
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=self.images[image_id],
+            filename=join(self.path, self.images[image_id]),
             width=1000,
             height=1000,
             preserve_aspect_ratio=True)

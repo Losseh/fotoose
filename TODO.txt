@@ -1,2 +1,3 @@
 - grupa zdjęć / rozwiązywanie konfliktu takich samych ujęć / wybór najlepszego ujęcia
-- chronologiczna zmiana nazw w folderze (nazwa folderu + numer)
+- przemianowywanie zdjęć usuwa także polskie znaki z nazwy folderu. okienko z wyborem nazwy bazowej?
+- refactor i podział na MVC - model / view / controller

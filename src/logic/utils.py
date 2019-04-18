@@ -1,6 +1,6 @@
 
 def rename_file(basename, extension, number):
-    return '{}_{:0>3}.{}'.format(basename, number, extension)
+    return '{}{:0>3}.{}'.format(basename, number, extension)
 
 
 def get_extension(filename):
@@ -15,26 +15,33 @@ def get_extension(filename):
         return split[1]
 
 
-def rename_chronologically(basename, files):
+def map_to_chronological_names(basename, files):
     """
     Sorts the files chronologically and returns a dictionary containing
-    old filename as key and new filename as value
+    old filename as key and new filename as value.
 
-    >>> rename_chronologically("base", {"f.jpg", 1})
+    !Important: dates must be float-typed
+
+    >>> map_to_chronological_names("base", {"f.jpg", 1.0})
     {"f.jpg": "base001.jpg"}
     """
 
-    date_to_file = {date: f for f, date in files.iteritems() if get_extension(f) is not None}
-
-    dates = date_to_file.keys()
-    dates.sort()
-
-    file_to_number = {date_to_file[date]: i + 1 for i, date in enumerate(dates)}
+    date_to_files = {}
+    for f, date in files.iteritems():
+        assert isinstance(date, float)
+        if get_extension(f) is not None:
+            if date in date_to_files:
+                date_to_files[date].append(f)
+            else:
+                date_to_files[date] = [f]
 
     output = {}
-
-    for date, old_file in date_to_file.iteritems():
-        output[old_file] = rename_file(basename, get_extension(old_file), file_to_number[old_file])
+    counter = 1
+    for date, files in sorted(date_to_files.iteritems()):
+        files.sort()
+        for old_file in files:
+            output[old_file] = rename_file(basename, get_extension(old_file), counter)
+            counter += 1
 
     return output
 
@@ -47,3 +54,7 @@ def is_image_file(filepath):
     path_and_extension = filepath.split(".")
 
     return len(path_and_extension) != 0 and path_and_extension[-1].lower() in allowed_extensions
+
+
+def retain_letters(text):
+    return ''.join(x for x in text if x.isalpha())
