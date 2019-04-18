@@ -1,6 +1,6 @@
 
 def rename_file(basename, extension, number):
-    return '{}{:0>3}.{}'.format(basename, number, extension)
+    return '{}{:0>4}.{}'.format(basename, number, extension)
 
 
 def get_extension(filename):

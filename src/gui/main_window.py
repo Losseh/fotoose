@@ -17,7 +17,7 @@ class MainWindow(Gtk.Window):
         accel = Gtk.AccelGroup()
         accel.connect(Gdk.keyval_from_name('N'), Gdk.ModifierType.CONTROL_MASK, 0, self.accel_previous_onclick)
         accel.connect(Gdk.keyval_from_name('M'), Gdk.ModifierType.CONTROL_MASK, 0, self.accel_next_onclick)
-        accel.connect(Gdk.keyval_from_name('D'), Gdk.ModifierType.CONTROL_MASK, 0, self.accel_choose_directory)
+        accel.connect(Gdk.keyval_from_name('O'), Gdk.ModifierType.CONTROL_MASK, 0, self.accel_choose_directory)
         self.add_accel_group(accel)
 
         self.vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -100,6 +100,9 @@ class MainWindow(Gtk.Window):
     def button_rename_photos(self, widget):
         # TODO: this should be a method in some kind of Controller class
         file_to_creation_time = map_files_to_creation_time(self.path, self.images)
+
+        max_number_of_files = 10000
+        assert len(file_to_creation_time) < max_number_of_files, "The program does not manage to rename more than 10000 files"
 
         directory_name = retain_letters(basename(self.path)).lower()
         old_to_new_names = map_to_chronological_names(directory_name, file_to_creation_time)

@@ -1,3 +1,6 @@
 - grupa zdjęć / rozwiązywanie konfliktu takich samych ujęć / wybór najlepszego ujęcia
 - przemianowywanie zdjęć usuwa także polskie znaki z nazwy folderu. okienko z wyborem nazwy bazowej?
 - refactor i podział na MVC - model / view / controller
+- typing escape on choosing directory dialog causes failure
+- renaming the directory might possibly override files when there are less files then 1000
+- choosing directory should start e.g. on Desktop
