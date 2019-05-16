@@ -1,7 +1,9 @@
 from os import rename, mkdir, rmdir
-from os.path import join, getmtime
+from os.path import join, exists
 import tempfile
 import logging
+from PIL import Image
+from datetime import datetime
 
 
 def is_rename_map_identity(rename_map):
@@ -20,7 +22,7 @@ def rename_files(directory, rename_map):
         return
 
     # create temporary directory
-    temporary_dir = "temp" + next(tempfile._get_candidate_names());
+    temporary_dir = "temp" + next(tempfile._get_candidate_names())
     temporary_dir_path = join(directory, temporary_dir)
     mkdir(temporary_dir_path)
 
@@ -42,4 +44,12 @@ def rename_files(directory, rename_map):
 
 
 def map_files_to_creation_time(directory, files):
-    return {f: getmtime(join(directory, f)) for f in files}
+    return {f: get_creation_time(join(directory, f)) for f in files}
+
+
+def get_creation_time(path):
+    assert(exists(path))
+    creation_time_tag_number = 36867
+    unicode_creation_time = Image.open(path)._getexif()[creation_time_tag_number]
+    datetime_formatted_result = datetime.strptime(unicode_creation_time, '%Y:%m:%d %H:%M:%S')
+    return datetime_formatted_result

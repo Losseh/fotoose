@@ -1,3 +1,6 @@
+- rename files should take into account also polish signs
+    - substitute polish signs at first and yet carry out the function as is
+
 - grupa zdjęć / rozwiązywanie konfliktu takich samych ujęć / wybór najlepszego ujęcia
 - przemianowywanie zdjęć usuwa także polskie znaki z nazwy folderu. okienko z wyborem nazwy bazowej?
 - refactor i podział na MVC - model / view / controller
