@@ -3,7 +3,7 @@ from logic.utils import is_image_file, map_to_chronological_names, retain_letter
 from system.utils import rename_files, map_files_to_creation_time
 
 from os import listdir
-from os.path import join, basename
+from os.path import join, basename, dirname
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -69,8 +69,13 @@ class MainWindow(Gtk.Window):
         self.choose_dir(args[1])
 
     def choose_dir(self, widget):
-        self.path = choose_directory(self, widget)
-        self.open_dir()
+        chosen_path = choose_directory(self, widget, self.get_previously_chosen_dir())
+        if chosen_path is not None:
+            self.path = chosen_path
+            self.open_dir()
+
+    def get_previously_chosen_dir(self):
+        return dirname(self.path) if self.path is not None else None
 
     def open_dir(self):
         files = listdir(self.path)

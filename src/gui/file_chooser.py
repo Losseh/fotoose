@@ -1,10 +1,12 @@
 import gi
 gi.require_version('Gtk', '3.0')
+from os import path
+from getpass import getuser
 from gi.repository import Gtk
 import logging
 
 
-def choose_directory(parent, widget):
+def choose_directory(parent, widget, start_directory=None):
     logger = logging.getLogger(__name__)
 
     dialog = Gtk.FileChooserDialog("Please choose a folder", parent,
@@ -13,6 +15,11 @@ def choose_directory(parent, widget):
                                     "Select", Gtk.ResponseType.OK))
     dialog.set_default_size(800, 400)
 
+    if start_directory is None:
+        start_directory = '/home/' + getuser()
+
+    dialog.set_current_folder(path.abspath(start_directory))
+
     chosen_directory = None
     response = dialog.run()
     if response == Gtk.ResponseType.OK:
@@ -20,9 +27,10 @@ def choose_directory(parent, widget):
         logger.debug("choose_directory: Folder selected: " + chosen_directory)
     elif response == Gtk.ResponseType.CANCEL:
         logger.debug("choose_directory: Cancel clicked")
+    else:
+        logger.debug("choose_directory: Dialog closed")
 
     dialog.destroy()
-
     return chosen_directory
 
 
